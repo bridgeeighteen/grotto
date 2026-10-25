@@ -1,0 +1,80 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Grotto\Config\Config;
+
+$root = dirname(__DIR__);
+$autoload = $root . '/vendor/autoload.php';
+
+if (!is_file($autoload)) {
+    fwrite(STDERR, "Missing vendor/autoload.php. Run: composer install\n");
+    exit(1);
+}
+
+require $autoload;
+
+Config::loadEnvironment($root);
+
+$command = $argv[1] ?? 'help';
+
+try {
+    switch ($command) {
+        case 'help':
+        case '--help':
+        case '-h':
+            printHelp();
+            break;
+
+        case 'check':
+            $config = new Config($root);
+            fwrite(STDOUT, sprintf("Grotto %s\n", $config->version()));
+            fwrite(STDOUT, "API keys: supplied by clients per request (not stored)\n");
+            fwrite(STDOUT, sprintf("UI: %s\n", $config->uiEnabled() ? 'enabled' : 'disabled'));
+            fwrite(STDOUT, sprintf("Rate limit: %s\n", $config->rateLimit()['enabled'] ? 'enabled' : 'disabled'));
+            fwrite(STDOUT, "Platforms:\n");
+
+            foreach ($config->platformIds() as $id) {
+                $platform = $config->platform($id);
+                fwrite(STDOUT, sprintf(
+                    "  %-12s %-10s %s\n",
+                    $id,
+                    $platform['enabled'] ? 'enabled' : 'disabled',
+                    implode(', ', $platform['capabilities'])
+                ));
+            }
+
+            if ($config->warnings() !== []) {
+                fwrite(STDOUT, "\nWarnings:\n");
+                foreach ($config->warnings() as $warning) {
+                    fwrite(STDOUT, '  - ' . $warning . "\n");
+                }
+            }
+            break;
+
+        default:
+            fwrite(STDERR, sprintf("Unknown command: %s\n\n", $command));
+            printHelp();
+            exit(1);
+    }
+} catch (Throwable $exception) {
+    fwrite(STDERR, 'Error: ' . $exception->getMessage() . "\n");
+    exit(1);
+}
+
+function printHelp(): void
+{
+    fwrite(STDOUT, <<<'HELP'
+Grotto maintenance commands
+
+  php bin/grotto check    Show non-secret configuration status
+
+Grotto does not store platform API keys. Callers send the key for the target
+platform with each request:
+
+  Authorization: Bearer <platform-api-key>
+HELP
+    );
+    fwrite(STDOUT, "\n");
+}
