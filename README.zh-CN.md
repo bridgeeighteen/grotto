@@ -277,4 +277,4 @@ tests/          单元测试与 HTTP 集成测试
 
 ## 许可证
 
-MIT，见 [`LICENSE`](LICENSE)。
+根据 AGPL-3.0-or-later 许可证分发。AGPL-3.0 的完整副本请见 [LICENSE](LICENSE)。

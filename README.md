@@ -276,5 +276,4 @@ tests/          Unit and HTTP integration tests
 To add a platform, see [`docs/PLATFORMS.md`](docs/PLATFORMS.md) or [`docs/PLATFORMS.zh-CN.md`](docs/PLATFORMS.zh-CN.md). The UI capability matrix automatically reflects the new platform through `/grotto/info`.
 
 ## License
-
-MIT. See [`LICENSE`](LICENSE).
+AGPL-3.0-or-later. See [`LICENSE`](LICENSE).

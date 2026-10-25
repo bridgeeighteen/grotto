@@ -2,7 +2,7 @@
     "name": "bridgeeighteen/grotto",
     "description": "An OpenAI-compatible gateway for various platforms.",
     "type": "project",
-    "license": "AGPLv3+",
+    "license": "AGPL-3.0+",
     "require": {
         "php": "^8.2",
         "ext-curl": "*",
