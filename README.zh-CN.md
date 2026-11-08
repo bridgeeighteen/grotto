@@ -152,7 +152,7 @@ GROTTO_ASYNC_TIMEOUT=300
 GROTTO_ASYNC_MAX_ATTEMPTS=600
 ```
 
-请将 `GROTTO_ASYNC_TIMEOUT` 设置得低于 Web 服务器/反向代理的请求超时。任务超时会返回 `504 <platform>_task_timeout`。
+请将 `GROTTO_ASYNC_TIMEOUT` 加上 `GROTTO_UPSTREAM_TIMEOUT` 后仍低于 Web 服务器/反向代理的请求超时。任务超时会返回 `504 <platform>_task_timeout`。
 
 ### 错误
 
@@ -178,6 +178,7 @@ GROTTO_ASYNC_MAX_ATTEMPTS=600
 | 变量 | 默认值 | 说明 |
 |---|---|---|
 | `GROTTO_PUBLIC_BASE_URL` | 请求来源 | 反向代理后请使用外部 HTTPS 地址。 |
+| `GROTTO_TRUSTED_PROXIES` | 空 | 仅信任这些代理 IP/CIDR 的 `X-Forwarded-*` 头。 |
 | `GROTTO_PLATFORMS` | 全部 | 逗号分隔的平台 ID。 |
 | `GROTTO_SYSTEM_PROMPT` | 内置策略 | 实例提示词。 |
 | `GROTTO_EXPOSE_SYSTEM_PROMPT` | `true` | 为 false 时 `/grotto/info` 仅返回哈希。 |
@@ -200,6 +201,7 @@ Web 控制台支持英文和简体中文。页头提供语言切换按钮，选�
 - [README.zh-CN.md](README.zh-CN.md)
 - [docs/API.zh-CN.md](docs/API.zh-CN.md)
 - [docs/PLATFORMS.zh-CN.md](docs/PLATFORMS.zh-CN.md)
+- [docs/DEPLOYMENT.zh-CN.md](docs/DEPLOYMENT.zh-CN.md)
 
 ## Libre WebUI
 
@@ -239,10 +241,12 @@ Libre WebUI 通过 OpenAI 兼容插件发现模型并发送对话。将 `key_env
 
 ## 部署说明
 
+完整的 Nginx、Apache + PHP-FPM、TLS、流式响应、OPcache、权限和故障排查步骤，请参阅 [`docs/DEPLOYMENT.zh-CN.md`](docs/DEPLOYMENT.zh-CN.md)（[English](docs/DEPLOYMENT.md)）。可直接复制的示例位于 [`deploy/`](deploy/)。
+
 - 将 Web 服务器文档根目录指向 `public/`；不要直接提供 `src/`、`.env` 或 `storage/`。
 - 将应用挂载在域名根路径。界面和生成的示例使用根绝对路径 `/assets` 与平台路径。
-- TLS 在反向代理终止时，将 `GROTTO_PUBLIC_BASE_URL` 设置为外部 HTTPS 地址。
-- 对 `/v1/chat/completions` 流式响应禁用代理缓冲；媒体任务的代理读取超时应高于 `GROTTO_ASYNC_TIMEOUT`。
+- TLS 在反向代理终止时，将 `GROTTO_PUBLIC_BASE_URL` 设置为外部 HTTPS 地址。也可以仅信任 `GROTTO_TRUSTED_PROXIES` 中列出的代理所发送的 `X-Forwarded-*` 头。
+- 对 `/v1/chat/completions` 流式响应禁用代理缓冲；媒体任务的代理读取超时应高于 `GROTTO_ASYNC_TIMEOUT` 加 `GROTTO_UPSTREAM_TIMEOUT`。
 - 为长时间媒体等待配置足够的 PHP-FPM 工作进程，或为无法长时间占用进程的工作负载提供独立异步任务 API。
 - 保留一个可写的 `storage/` 目录。默认限流器仅限单机。
 - 在平台侧轮换供应商密钥；Grotto 没有服务器端密钥副本需要轮换，也无需因密钥变更而重启。
@@ -269,6 +273,7 @@ src/Core        提示词策略、归一化、流式、图片清理、错误
 src/Config      环境驱动配置（不包含平台密钥）
 src/Support     日志、HTTP 客户端工厂、速率限制
 config/         平台注册表、中间件顺序、容器定义
+deploy/         Nginx、Apache、PHP 和日志轮转生产示例
 frontend/       纯 HTML/CSS/JS 验证工作台（英文与中文）
 tests/          单元测试与 HTTP 集成测试
 ```

@@ -32,6 +32,35 @@ final class HttpSurfaceTest extends TestCase
         self::assertNotEmpty($response->getHeaderLine('X-Grotto-Request-Id'));
     }
 
+    public function testInfoUsesTrustedForwardedOrigin(): void
+    {
+        $app = $this->app([
+            'GROTTO_PUBLIC_BASE_URL' => '',
+            'GROTTO_TRUSTED_PROXIES' => '10.0.0.0/8',
+        ]);
+        $request = new ServerRequest(
+            'GET',
+            'http://internal.example/grotto/info',
+            [
+                'X-Forwarded-Proto' => 'https',
+                'X-Forwarded-Host' => 'grotto.example.com',
+            ],
+            null,
+            '1.1',
+            ['REMOTE_ADDR' => '10.1.2.3']
+        );
+
+        $payload = json_decode(
+            $this->body($app->handle($request)),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+
+        self::assertSame('https://grotto.example.com', $payload['api_base_url']);
+        self::assertSame('https://grotto.example.com/ui', $payload['ui_url']);
+    }
+
     public function testInfoCanRedactPrompt(): void
     {
         $app = $this->app([

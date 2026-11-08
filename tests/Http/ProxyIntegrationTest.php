@@ -101,6 +101,7 @@ final class ProxyIntegrationTest extends TestCase
         self::assertSame(200, $response->getStatusCode());
         self::assertStringContainsString('text/event-stream', $response->getHeaderLine('Content-Type'));
         self::assertSame('no-cache, no-transform', $response->getHeaderLine('Cache-Control'));
+        self::assertSame('no', $response->getHeaderLine('X-Accel-Buffering'));
         self::assertSame($sse, $this->body($response));
         self::assertSame('text/event-stream', $this->history[0]['request']->getHeaderLine('Accept'));
     }

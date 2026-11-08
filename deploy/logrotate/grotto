@@ -1,0 +1,16 @@
+# Grotto application log rotation.
+#
+# Install as /etc/logrotate.d/grotto and adjust the path and owner.
+# copytruncate is used because Monolog keeps the log file open for the life of
+# a PHP-FPM worker. As an alternative, rotate normally and reload PHP-FPM.
+
+/var/www/grotto/storage/logs/*.log {
+    daily
+    rotate 14
+    missingok
+    notifempty
+    compress
+    delaycompress
+    copytruncate
+    su www-data www-data
+}

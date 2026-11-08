@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Grotto\Http\Controller;
 
 use Grotto\Config\Config;
+use Grotto\Http\RequestOriginResolver;
 use Grotto\Platform\PlatformCapability;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -17,12 +18,13 @@ final class GrottoInfoController
         private readonly Config $config,
         private readonly ResponseFactoryInterface $responseFactory,
         private readonly StreamFactoryInterface $streamFactory,
+        private readonly RequestOriginResolver $originResolver,
     ) {
     }
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        $baseUrl = $this->baseUrl($request);
+        $baseUrl = $this->originResolver->resolve($request);
         $prompt = $this->config->systemPrompt();
         $exposed = $this->config->systemPromptExposed();
         $apiKey = $this->config->apiKeyPolicy();
@@ -136,22 +138,5 @@ final class GrottoInfoController
             ->withHeader('Content-Type', 'application/json; charset=utf-8')
             ->withHeader('Cache-Control', 'no-store')
             ->withBody($this->streamFactory->createStream($body));
-    }
-
-    private function baseUrl(ServerRequestInterface $request): string
-    {
-        $configured = $this->config->publicBaseUrl();
-
-        if ($configured !== null) {
-            return $configured;
-        }
-
-        $uri = $request->getUri();
-        $scheme = $uri->getScheme() !== '' ? $uri->getScheme() : 'http';
-        $host = $uri->getHost() !== '' ? $uri->getHost() : 'localhost';
-        $port = $uri->getPort();
-        $authority = $host . ($port !== null ? ':' . $port : '');
-
-        return $scheme . '://' . $authority;
     }
 }

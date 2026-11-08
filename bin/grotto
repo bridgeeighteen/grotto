@@ -29,10 +29,26 @@ try {
 
         case 'check':
             $config = new Config($root);
+            $proxies = $config->trustedProxies();
+            $storageReady = is_writable($root . '/storage/logs')
+                && is_writable($root . '/storage/cache');
+
             fwrite(STDOUT, sprintf("Grotto %s\n", $config->version()));
             fwrite(STDOUT, "API keys: supplied by clients per request (not stored)\n");
             fwrite(STDOUT, sprintf("UI: %s\n", $config->uiEnabled() ? 'enabled' : 'disabled'));
             fwrite(STDOUT, sprintf("Rate limit: %s\n", $config->rateLimit()['enabled'] ? 'enabled' : 'disabled'));
+            fwrite(STDOUT, sprintf(
+                "Public base URL: %s\n",
+                $config->publicBaseUrl() ?? '(request-derived)'
+            ));
+            fwrite(STDOUT, sprintf(
+                "Trusted proxies: %s\n",
+                $proxies === [] ? '(none)' : implode(', ', $proxies)
+            ));
+            fwrite(STDOUT, sprintf(
+                "Storage: %s\n",
+                $storageReady ? 'writable' : 'NOT WRITABLE (check storage/logs and storage/cache)'
+            ));
             fwrite(STDOUT, "Platforms:\n");
 
             foreach ($config->platformIds() as $id) {

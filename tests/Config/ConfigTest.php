@@ -44,6 +44,18 @@ final class ConfigTest extends TestCase
         self::assertContains('tts', $enabled->platform('modelscope')['capabilities']);
     }
 
+    public function testTrustedProxiesCanBeConfigured(): void
+    {
+        $config = $this->config([
+            'GROTTO_TRUSTED_PROXIES' => '10.0.0.0/8, 2001:db8::1, 192.0.2.10',
+        ]);
+
+        self::assertSame(
+            ['10.0.0.0/8', '2001:db8::1', '192.0.2.10'],
+            $config->trustedProxies()
+        );
+    }
+
     public function testPromptPolicyCanBeOverridden(): void
     {
         $config = $this->config([

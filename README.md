@@ -152,7 +152,7 @@ GROTTO_ASYNC_TIMEOUT=300
 GROTTO_ASYNC_MAX_ATTEMPTS=600
 ```
 
-Keep `GROTTO_ASYNC_TIMEOUT` below your web server / reverse proxy request timeout. If a job exceeds the limit, Grotto returns `504` with `<platform>_task_timeout`.
+Keep `GROTTO_ASYNC_TIMEOUT` plus `GROTTO_UPSTREAM_TIMEOUT` below your web server / reverse proxy request timeout. If a job exceeds the limit, Grotto returns `504` with `<platform>_task_timeout`.
 
 ### Errors
 
@@ -178,6 +178,7 @@ Copy `.env.example` and edit it. Grotto configuration does not contain provider 
 | Variable | Default | Notes |
 |---|---|---|
 | `GROTTO_PUBLIC_BASE_URL` | request origin | Use the external HTTPS origin behind a proxy. |
+| `GROTTO_TRUSTED_PROXIES` | empty | Trust `X-Forwarded-*` only from these proxy IPs/CIDRs. |
 | `GROTTO_PLATFORMS` | all | Comma-separated platform IDs. |
 | `GROTTO_SYSTEM_PROMPT` | built-in policy | Instance prompt. |
 | `GROTTO_EXPOSE_SYSTEM_PROMPT` | `true` | If false, `/grotto/info` only exposes a hash. |
@@ -200,6 +201,7 @@ The web console supports English and Simplified Chinese. The language switcher i
 - [README.zh-CN.md](README.zh-CN.md)
 - [docs/API.zh-CN.md](docs/API.zh-CN.md)
 - [docs/PLATFORMS.zh-CN.md](docs/PLATFORMS.zh-CN.md)
+- [docs/DEPLOYMENT.zh-CN.md](docs/DEPLOYMENT.zh-CN.md)
 
 ## Libre WebUI
 
@@ -239,10 +241,12 @@ Repeat with `/modelscope/v1` or `/volcengine/v1` for the other platforms. The pl
 
 ## Deployment notes
 
+For complete Nginx and Apache + PHP-FPM instructions, including TLS, streaming, OPcache, permissions, and troubleshooting, see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) ([简体中文](docs/DEPLOYMENT.zh-CN.md)). Ready-to-copy examples live in [`deploy/`](deploy/).
+
 - Point the web server document root at `public/`; do not serve `src/`, `.env`, or `storage/` directly.
 - Mount the app at the origin root. The UI and generated examples use root-absolute `/assets` and platform paths.
-- Set `GROTTO_PUBLIC_BASE_URL` to the external HTTPS origin when TLS terminates at a reverse proxy.
-- Disable proxy buffering for `/v1/chat/completions` streaming, and set the proxy read timeout above `GROTTO_ASYNC_TIMEOUT` for media jobs.
+- Set `GROTTO_PUBLIC_BASE_URL` to the external HTTPS origin when TLS terminates at a reverse proxy. Alternatively, trust `X-Forwarded-*` headers only from addresses listed in `GROTTO_TRUSTED_PROXIES`.
+- Disable proxy buffering for `/v1/chat/completions` streaming, and set the proxy read timeout above `GROTTO_ASYNC_TIMEOUT` plus `GROTTO_UPSTREAM_TIMEOUT` for media jobs.
 - Use PHP-FPM workers sized for long-running media waits, or expose a separate asynchronous task API if your workload cannot hold workers.
 - Keep one writable `storage/` directory. The default rate limiter is local to one host.
 - Rotate provider keys at the platform; Grotto has no server-side key copy to rotate. Restart is not required for a key change.
@@ -269,6 +273,7 @@ src/Core        Prompt policy, normalizers, streaming, image sanitizer, errors
 src/Config      Environment-backed configuration (no provider keys)
 src/Support     Logger, HTTP client factory, rate limiter
 config/         Platform registry, middleware order, container definitions
+deploy/         Nginx, Apache, PHP, and logrotate production examples
 frontend/       Plain HTML/CSS/JS verification workbench (English and Chinese)
 tests/          Unit and HTTP integration tests
 ```

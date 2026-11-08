@@ -87,6 +87,16 @@ final class Config
     }
 
     /**
+     * IP addresses or CIDR ranges whose X-Forwarded-* headers are trusted.
+     *
+     * @return list<string>
+     */
+    public function trustedProxies(): array
+    {
+        return Env::list('GROTTO_TRUSTED_PROXIES', (array) $this->get('http.trusted_proxies', []));
+    }
+
+    /**
      * Describes where the upstream API key comes from. Keys are supplied by
      * the client on every proxy request and are never persisted by Grotto.
      *

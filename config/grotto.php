@@ -63,6 +63,7 @@ return [
         'timeout' => 120.0,
         'verify' => true,
         'user_agent' => 'Grotto/1.0',
+        'trusted_proxies' => [],
     ],
     'async' => [
         'poll_interval_ms' => 1000,

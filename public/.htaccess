@@ -1,8 +1,32 @@
-RewriteEngine On
+# Grotto front controller for Apache 2.4.
+#
+# The recommended production setup places these rules in the virtual host and
+# sets AllowOverride None. This file keeps shared hosting and simple Apache
+# deployments working without changing the virtual host.
 
-# Preserve authorization headers for FastCGI / PHP-FPM deployments.
-RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+Options -Indexes -MultiViews
+DirectoryIndex index.php
+AddDefaultCharset UTF-8
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ index.php [QSA,L]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Apache + PHP-FPM/CGI can hide Authorization from PHP. Preserve it for
+    # the per-request platform key.
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Never expose dotfiles such as .env, .htaccess, or .user.ini.
+    # Keep .well-known available for ACME challenges.
+    RewriteRule (^|/)\.(?!well-known) - [F,L]
+
+    # Route every non-file/non-directory request to the front controller.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Compatibility fallback for FastCGI setups that do not use mod_rewrite for
+# the Authorization header.
+<IfModule mod_setenvif.c>
+    SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
+</IfModule>
