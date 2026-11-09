@@ -56,8 +56,8 @@ return [
             'capabilities' => [PlatformCapability::TTS, PlatformCapability::STT],
         ],
         'default_models' => [
-            PlatformCapability::CHAT => 'Qwen/Qwen3-235B-A22B-Instruct-2507',
-            PlatformCapability::IMAGES => 'Qwen/Qwen-Image',
+            PlatformCapability::CHAT => 'Qwen/Qwen3.8-Flash-Next',
+            PlatformCapability::IMAGES => 'Qwen/Qwen-Image-2.1',
             PlatformCapability::VIDEOS => 'Wan-AI/Wan2.1-T2V-14B',
         ],
         'notes' => 'Image and video tasks use the ModelScope asynchronous task API and are polled by Grotto.',

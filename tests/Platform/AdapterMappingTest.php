@@ -107,7 +107,7 @@ final class AdapterMappingTest extends TestCase
         );
         $ctx = $this->context('modelscope', PlatformCapability::IMAGES);
         $request = $adapter->toUpstream(PlatformCapability::IMAGES, [
-            'model' => 'Qwen/Qwen-Image',
+            'model' => 'Qwen/Qwen-Image-2.1',
             'prompt' => 'a grotto',
         ], $ctx);
 
