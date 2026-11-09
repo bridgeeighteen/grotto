@@ -2,9 +2,11 @@
 
 **English** · [简体中文](README.zh-CN.md)
 
-Grotto is a small OpenAI-compatible gateway for **Alibaba Cloud Bailian**, **ModelScope**, and **Volcengine Ark**. It exposes stable `/v1` routes, translates platform-specific request and response shapes, applies an instance-level system prompt policy, polls asynchronous media jobs, proxies chat SSE without buffering, and removes image metadata before returning inline images.
+Grotto is a small OpenAI-compatible gateway for various platforms, currently support **Alibaba Cloud Bailian**, **ModelScope**, and **Volcengine Ark**. It exposes stable routes, translates platform-specific request and response shapes, applies an instance-level system prompt policy, polls asynchronous media jobs, proxies chat SSE without buffering, and removes image metadata before returning inline images.
 
 Grotto is **bring-your-own-key**: the caller sends the API key for the target platform with every request, and Grotto forwards that key to the platform. Provider keys are never read from environment variables, written to disk, cached, or included in logs. The built-in verification UI is served at `/ui` and supports English and Simplified Chinese.
+
+Grotto is a part of the Bridge Eighteen Community AI Lab.
 
 ## What is included
 
